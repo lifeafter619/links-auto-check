@@ -45,11 +45,11 @@ def check_site_with_proxy(url, proxy_list):
                 proxies=proxies
             )
             if response.status_code == 200:
-                return {"name": "正常", "color": "green"}
+                return {"name": "✅正常", "color": "green"}
             else:
-                return {"name": f"HTTP错误: {response.status_code}", "color": "red"}
+                return {"name": f"❓HTTP错误: {response.status_code}", "color": "red"}
         except requests.exceptions.Timeout:
-            return {"name": "超时", "color": "orange"}
+            return {"name": "❌超时", "color": "orange"}
         except requests.exceptions.ConnectionError:
             # 代理可能失效，从列表中移除
             if proxy in proxy_list:
@@ -83,7 +83,7 @@ def update_status():
                     utc_now = datetime.utcnow()
                     beijing_time = utc_now + timedelta(hours=8)
                     formatted_time = beijing_time.strftime("%Y-%m-%d %H:%M")
-                    last_check_text = f"于 {formatted_time} 最后检测"
+                    last_check_text = f"于 {formatted_time} 检测状态啦~"
                     
                     # 更新Notion属性
                     properties_update = {
@@ -93,7 +93,7 @@ def update_status():
                                 "color": status_data["color"]
                             }
                         },
-                        "最后检测": {"rich_text": [{"text": {"content": last_check_text}}]}
+                        "LAST-CHECK": {"rich_text": [{"text": {"content": last_check_text}}]}
                     }
                     
                     notion.pages.update(
