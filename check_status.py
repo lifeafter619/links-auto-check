@@ -43,7 +43,7 @@ def update_status():
                 notion.pages.update(
                     page["id"],
                     properties={
-                        "状态": {"select": {"name": new_status}},
+                        "status": {"select": {"name": new_status}},
                         "最后检测时间": {"rich_text": [{"text": {"content": last_check_text}}]}
                     }
                 )
