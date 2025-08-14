@@ -29,7 +29,7 @@ def update_status():
         )
         pages = query.get("results")
         for page in pages:
-            url_property = page["properties"]["URL-TEXT"]["url"]
+            url_property = page["properties"]["URL-TEXT"]
             if url_property:
                 new_status = check_site(url_property)
                 
