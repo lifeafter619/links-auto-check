@@ -37,7 +37,7 @@ def update_status():
                 utc_now = datetime.utcnow()
                 beijing_time = utc_now + timedelta(hours=8)
                 formatted_time = beijing_time.strftime("%Y-%m-%d %H:%M")
-                last_check_text = f"本状态于 {formatted_time} 自动检测~"
+                last_check_text = f"于 {formatted_time} 自动检测~"
                 
                 # 更新Notion属性
                 notion.pages.update(
