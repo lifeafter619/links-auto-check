@@ -10,13 +10,13 @@ database_id = os.environ["DATABASE_ID"]
 def check_site(url):
     try:
         response = requests.get(url, timeout=15, allow_redirects=True)
-        return "✅正常" if response.status_code in (200, 403) else f"❓HTTP错误: {response.status_code}"
+        return "状态：✅正常" if response.status_code in (200, 403) else f"状态：❓HTTP错误: {response.status_code}"
     except requests.exceptions.Timeout:
-        return "❌超时"
+        return "状态：❌超时"
     except requests.exceptions.ConnectionError:
-        return "❌DNS错误"
+        return "状态：❌DNS错误"
     except Exception:
-        return "❌异常"
+        return "状态：❌异常"
 
 def update_status():
     cursor = None
