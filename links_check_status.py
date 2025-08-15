@@ -19,8 +19,19 @@ def check_site(url):
             return f"状态：❓HTTP错误: {response.status_code}", None
     except requests.exceptions.Timeout:
         return "状态：❌超时", None
-    except requests.exceptions.ConnectionError:
-        return "状态：❌DNS错误", None
+    except requests.exceptions.ConnectionError as e:
+        # 更详细的错误检测
+        err_str = str(e).lower()
+        if "dns" in err_str or "name or service not known" in err_str or "nodename nor servname provided" in err_str:
+            return "状态：❌DNS错误", None
+        elif "connection refused" in err_str:
+            return "状态：❌连接被拒绝", None
+        elif "connection reset" in err_str:
+            return "状态：❌连接被重置", None
+        else:
+            return f"状态：❌连接异常: {e}", None
+    except requests.exceptions.SSLError as e:
+        return f"状态：❌SSL错误: {e}", None
     except Exception as e:
         return f"状态：❌异常: {e}", None
 
