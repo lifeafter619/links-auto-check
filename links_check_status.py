@@ -15,7 +15,7 @@ def check_site(url):
         open_time_sec = round(end_time - start_time, 2)
         # 只要能响应就判正常，且只在有实际响应时显示时间
         return (
-            f"状态：✅正常（{open_time_sec}s）" if open_time_sec > 0 else "状态：✅正常",
+            f"状态：✅正常({open_time_sec}s)" if open_time_sec > 0 else "状态：✅正常",
             open_time_sec if open_time_sec > 0 else None
         )
     except requests.exceptions.Timeout:
