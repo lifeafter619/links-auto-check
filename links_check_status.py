@@ -11,29 +11,16 @@ def check_site(url):
     try:
         start_time = time.time()
         response = requests.get(url, timeout=15, allow_redirects=True)
-        end_time = time.time()
-        open_time_sec = round(end_time - start_time, 2)
-        if response.status_code in (200, 403):
+        if 200 <= response.status_code < 400:
+            end_time = time.time()
+            open_time_sec = round(end_time - start_time, 2)
             return f"状态：✅正常（{open_time_sec}s）", open_time_sec
         else:
-            return f"状态：❓HTTP错误: {response.status_code}", None
+            return "状态：❓不可用", None
     except requests.exceptions.Timeout:
         return "状态：❌超时", None
-    except requests.exceptions.ConnectionError as e:
-        # 更详细的错误检测
-        err_str = str(e).lower()
-        if "dns" in err_str or "name or service not known" in err_str or "nodename nor servname provided" in err_str:
-            return "状态：❌DNS错误", None
-        elif "connection refused" in err_str:
-            return "状态：❌连接被拒绝", None
-        elif "connection reset" in err_str:
-            return "状态：❌连接被重置", None
-        else:
-            return f"状态：❌连接异常: {e}", None
-    except requests.exceptions.SSLError as e:
-        return f"状态：❌SSL错误: {e}", None
-    except Exception as e:
-        return f"状态：❌异常: {e}", None
+    except Exception:
+        return "状态：❓不可用", None
 
 def update_status():
     cursor = None
@@ -49,7 +36,6 @@ def update_status():
             page_id = page["id"]
             url_property = page["properties"]["URL-TEXT"]["url"]
 
-            # 新增：主页链接与头像链接
             homepage_cover = page["properties"].get("主页链接", {}).get("url")
             avatar_icon = page["properties"].get("头像链接", {}).get("url")
 
@@ -57,10 +43,8 @@ def update_status():
                 "properties": {}
             }
 
-            # 检查目标站点状态和打开时间
             new_status, open_time_sec = check_site(url_property)
 
-            # 生成北京时间 (UTC+8)
             utc_now = datetime.utcnow()
             beijing_time = utc_now + timedelta(hours=8)
             formatted_time = beijing_time.strftime("%Y-%m-%d %H:%M")
@@ -71,14 +55,12 @@ def update_status():
             if open_time_sec is not None:
                 update_payload["properties"]["OPEN-TIME"] = {"number": open_time_sec}
 
-            # 设置封面
             if homepage_cover:
                 update_payload["cover"] = {
                     "type": "external",
                     "external": {"url": homepage_cover}
                 }
                 print(f"设置封面: {homepage_cover}")
-            # 设置图标
             if avatar_icon:
                 update_payload["icon"] = {
                     "type": "external",
