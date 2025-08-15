@@ -11,16 +11,31 @@ def check_site(url):
     try:
         start_time = time.time()
         response = requests.get(url, timeout=15, allow_redirects=True)
-        if 200 <= response.status_code < 400:
-            end_time = time.time()
-            open_time_sec = round(end_time - start_time, 2)
-            return f"状态：✅正常（{open_time_sec}s）", open_time_sec
-        else:
-            return "状态：❓不可用", None
+        end_time = time.time()
+        open_time_sec = round(end_time - start_time, 2)
+        # 只要能响应就判正常，且只在有实际响应时显示时间
+        return (
+            f"状态：✅正常（{open_time_sec}s）" if open_time_sec > 0 else "状态：✅正常",
+            open_time_sec if open_time_sec > 0 else None
+        )
     except requests.exceptions.Timeout:
-        return "状态：❌超时", None
-    except Exception:
         return "状态：❓不可用", None
+    except requests.exceptions.ConnectionError as e:
+        err_str = str(e).lower()
+        # 只要是明显的DNS错误或无法建立连接才算不可用
+        if (
+            "dns" in err_str
+            or "name or service not known" in err_str
+            or "nodename nor servname provided" in err_str
+            or "failed to establish a new connection" in err_str
+            or "connection refused" in err_str
+        ):
+            return "状态：❓不可用", None
+        # 其它连接问题也报正常，不显示时间
+        return "状态：✅正常", None
+    except Exception:
+        # 其它所有异常都算正常，不显示时间
+        return "状态：✅正常", None
 
 def update_status():
     cursor = None
@@ -54,6 +69,8 @@ def update_status():
             update_payload["properties"]["LAST-CHECK"] = {"rich_text": [{"text": {"content": last_check_text}}]}
             if open_time_sec is not None:
                 update_payload["properties"]["OPEN-TIME"] = {"number": open_time_sec}
+            else:
+                update_payload["properties"]["OPEN-TIME"] = {"number": None}
 
             if homepage_cover:
                 update_payload["cover"] = {
