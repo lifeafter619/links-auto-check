@@ -60,23 +60,12 @@ def update_status():
 
             new_status, open_time_sec = check_site(url_property)
 
-            # 根据状态设置颜色
-            if "正常" in new_status:
-                status_color = "green"
-            else:
-                status_color = "red"
-
             utc_now = datetime.utcnow()
             beijing_time = utc_now + timedelta(hours=8)
             formatted_time = beijing_time.strftime("%Y-%m-%d %H:%M")
             last_check_text = f"于 {formatted_time} 自动检测~"
 
-            update_payload["properties"]["Status"] = {
-                "select": {
-                    "name": new_status,
-                    "color": status_color
-                }
-            }
+            update_payload["properties"]["Status"] = {"select": {"name": new_status}}
             update_payload["properties"]["LAST-CHECK"] = {"rich_text": [{"text": {"content": last_check_text}}]}
             if open_time_sec is not None:
                 update_payload["properties"]["OPEN-TIME"] = {"number": open_time_sec}
