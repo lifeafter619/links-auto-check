@@ -41,7 +41,7 @@ def update_status():
     cursor = None
     while True:
         query = notion.databases.query(
-            database_id,
+            database_id=database_id,
             start_cursor=cursor,
             page_size=50,
             filter={"property": "URL-TEXT", "url": {"is_not_empty": True}}
