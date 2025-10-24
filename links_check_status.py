@@ -40,13 +40,21 @@ def check_site(url):
 def update_status():
     cursor = None
     while True:
-        query = notion.databases.query(
-            database_id=database_id,
+        # 获取数据库信息
+        database_info = notion.databases.retrieve(database_id=database_id)
+        data_sources = database_info.get("data_sources", [])
+        if not data_sources:
+            raise ValueError("未找到数据源 ID，请检查数据库配置。")
+        data_source_id = data_sources[0]["id"]
+
+        # 查询数据源
+        query = notion.data_sources.query(
+            data_source_id=data_source_id,
             start_cursor=cursor,
             page_size=50,
             filter={"property": "URL-TEXT", "url": {"is_not_empty": True}}
         )
-        pages = query.get("results")
+        pages = query.get("results", [])
         for page in pages:
             page_id = page["id"]
             url_property = page["properties"]["URL-TEXT"]["url"]
